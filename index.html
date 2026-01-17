@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>이미지 메시지 숨기기 도구 : JBJB Service</title>
+  <link rel="icon" type="image/svg+xml" href="./logo.png">
+
+  <style>
+    :root {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --border: #333;
+      --text: #e0e0e0;
+      --text-sub: #aaaaaa;
+      --accent: #3663FF;
+      --accent-hover: #4d7aff;
+      --danger: #ff4444;
+      --radius: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* 탭 네비게이션 */
+    .tab-bar {
+      background: #1a1a1a;
+      border-bottom: 1px solid #333;
+      padding: 12px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .tab-container {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: #222;
+      border: none;
+      border-radius: 12px;
+      color: #aaa;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-size: 0.98rem;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 16px rgba(54,99,255,0.35);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #2c2c2c;
+      color: #ddd;
+    }
+
+    .page-container {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tab-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 520px;
+      backdrop-filter: blur(10px);
+      display: none;
+      position: relative;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 정보 버튼 (a.png 이미지 사용) */
+    .info-btn {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .info-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .info-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1e1e1e;
+      border: 1px solid #444;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 460px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      position: relative;
+      animation: modalFadeIn 0.4s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 28px;
+      color: #888;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: white;
+    }
+
+    .modal-content h2 {
+      text-align: center;
+      margin-bottom: 1.4rem;
+      font-size: 1.5rem;
+    }
+
+    .modal-content p {
+      line-height: 1.6;
+      color: #ccc;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: var(--text-sub);
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 2.2rem;
+    }
+
+    .step-dots {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .step-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #444;
+      transition: all 0.4s ease;
+    }
+
+    .step-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(54,99,255,0.25);
+      transform: scale(1.3);
+    }
+
+    .upload-zone {
+      border: 2px dashed #444;
+      border-radius: 16px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.02);
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.active {
+      border-color: var(--accent);
+      background: rgba(54,99,255,0.08);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--accent-hover);
+      background: rgba(54,99,255,0.15);
+    }
+
+    .upload-preview {
+      max-width: 100%;
+      max-height: 140px;
+      border-radius: 10px;
+      object-fit: contain;
+      margin-bottom: 12px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .upload-text {
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      transition: opacity 0.3s;
+    }
+
+    .has-preview .upload-text {
+      opacity: 0.65;
+      font-size: 0.98rem;
+    }
+
+    .upload-subtext {
+      color: var(--text-sub);
+      font-size: 0.9rem;
+    }
+
+    .filename-display {
+      margin-top: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.95rem;
+      word-break: break-all;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px 16px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+      margin: 1.5rem 0;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(54,99,255,0.15);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: white;
+      background: var(--accent);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-top: 1rem;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(54,99,255,0.35);
+    }
+
+    .back-btn {
+      background: #2c2c2c;
+      color: #ccc;
+    }
+
+    .back-btn:hover {
+      background: #383838;
+    }
+
+    #finalPreview {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 2rem;
+      border: 1px solid #444;
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px 20px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 520px) {
+      .tab-container { flex-direction: column; gap: 10px; }
+      .tab-btn { width: 100%; }
+      .toast { left: 10px; right: 10px; top: 70px; }
+      .info-btn { top: 20px; right: 20px; width: 36px; height: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <div class="tab-container">
+    <button class="tab-btn active" data-tab="hide">메시지 숨기기</button>
+    <button class="tab-btn" data-tab="extract">메시지 조회</button>
+  </div>
+</div>
+
+<div class="page-container">
+
+
+  <div id="hideTab" class="tab-content active">
+    <div class="info-btn" onclick="document.getElementById('infoModal').classList.add('active')">
+      <img src="a.png" alt="정보">
+    </div>
+
+    <h1>메시지 숨기기</h1>
+    <div class="subtitle">이미지에 메시지를 인코딩합니다</div>
+
+    <div class="step-dots">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="upload-zone" id="hideDropZone">
+      <img id="hidePreview" class="upload-preview" alt="미리보기"/>
+      <div class="upload-text">PNG 이미지를 여기에 올려주세요</div>
+      <div class="upload-subtext">클릭하거나 파일을 드래그해서 업로드</div>
+      <div class="filename-display" id="hideFileName"></div>
+    </div>
+
+    <input type="file" id="hideImageInput" accept="image/png" style="display:none;">
+
+    <label style="display:block; margin:1.8rem 0 0.8rem; font-weight:500; color:var(--text-sub);">
+      숨길 메시지
+    </label>
+    <textarea id="secretText" placeholder="여기에 비밀 메시지를 입력하세요..."></textarea>
+
+    <button class="btn" id="createHiddenBtn">이미지 만들기 & 다운로드</button>
+  </div>
+
+
+  <div id="extractTab" class="tab-content">
+    <div class="info-btn" onclick="document.getElementById('infoModal').classList.add('active')">
+      <img src="a.png" alt="정보">
+    </div>
+
+    <h1>메시지 조회</h1>
+    <div class="subtitle">숨겨진 메시지를 조회합니다</div>
+
+    <div class="step-dots">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="upload-zone" id="extractDropZone">
+      <img id="extractPreview" class="upload-preview" alt="미리보기"/>
+      <div class="upload-text">PNG 이미지를 여기에 올려주세요</div>
+      <div class="upload-subtext">클릭하거나 파일을 드래그</div>
+      <div class="filename-display" id="extractFileName"></div>
+    </div>
+
+    <input type="file" id="extractImageInput" accept="image/*" style="display:none;">
+
+    <button class="btn" id="extractBtn">메시지 추출하기</button>
+
+    <div id="extractResult" style="
+      margin-top: 2rem;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent);
+      min-height: 100px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      display: none;
+    "></div>
+  </div>
+
+</div>
+
+<!-- 정보 모달 (공통) -->
+<div class="modal-overlay" id="infoModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="document.getElementById('infoModal').classList.remove('active')">×</span>
+    <h2>이미지 메시지 숨기기 도구</h2>
+    <p>PNG 이미지에 텍스트를 숨기거나, 숨겨진 텍스트를 추출할 수 있는 간단한 스테가노그래피 도구입니다.</p>
+    <p>숨긴 메시지는 일반 이미지 뷰어로는 전혀 보이지 않으며,<br>이 도구의 "메시지 조회" 기능으로만 확인 가능합니다.</p>
+    <p>사용자가 원하는 이미지에 텍스트를 적으면 UTF 8 로 메시지가 인코딩되 이 사이트의 이미지 뷰어로 확인가능합니다</p>
+    <p style="margin-top:1.6rem; text-align:center; color:#888; font-size:0.9rem;">
+      Made by JB777
+    </p>
+  </div>
+</div>
+
+<!-- 토스트 알림 -->
+<div class="toast" id="toast"></div>
+
+<script>
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+  });
+});
+
+// 토스트 함수
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+// 공통 파일 처리 헬퍼
+function handleFileSelect(fileInput, dropZone, previewImg, fileNameEl, acceptOnlyPNG = false) {
+  const handle = (file) => {
+    if (acceptOnlyPNG && file.type !== 'image/png') {
+      showToast('PNG 파일만 업로드할 수 있습니다');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImg.src = e.target.result;
+      previewImg.style.display = 'block';
+      dropZone.classList.add('has-preview');
+    };
+    reader.readAsDataURL(file);
+
+    fileNameEl.textContent = file.name;
+  };
+
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) handle(e.target.files[0]);
+  });
+
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handle(e.dataTransfer.files[0]);
+  });
+}
+
+// 숨기기 페이지
+const hideMark = "<<<SECRET_MARK>>>";
+handleFileSelect(
+  document.getElementById('hideImageInput'),
+  document.getElementById('hideDropZone'),
+  document.getElementById('hidePreview'),
+  document.getElementById('hideFileName'),
+  true // PNG만
+);
+
+document.getElementById('createHiddenBtn').onclick = async () => {
+  const fileInput = document.getElementById('hideImageInput');
+  const text = document.getElementById('secretText').value.trim();
+
+  if (!fileInput.files[0]) return showToast('PNG 이미지를 선택해주세요');
+  if (!text) return showToast('숨길 메시지를 입력해주세요');
+
+  try {
+    const buffer = await fileInput.files[0].arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const encoder = new TextEncoder();
+    const markBytes = encoder.encode(hideMark + text);
+
+    const combined = new Uint8Array(bytes.length + markBytes.length);
+    combined.set(bytes);
+    combined.set(markBytes, bytes.length);
+
+    const blob = new Blob([combined], { type: 'image/png' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hidden_' + fileInput.files[0].name;
+    a.click();
+
+    showToast('이미지가 성공적으로 생성되어 다운로드되었습니다!');
+  } catch (e) {
+    showToast('오류가 발생했습니다 : ' + e.message);
+  }
+};
+
+// 조회 페이지
+const extractMark = "<<<SECRET_MARK>>>";
+handleFileSelect(
+  document.getElementById('extractImageInput'),
+  document.getElementById('extractDropZone'),
+  document.getElementById('extractPreview'),
+  document.getElementById('extractFileName')
+);
+
+document.getElementById('extractBtn').onclick = async () => {
+  const fileInput = document.getElementById('extractImageInput');
+  const resultEl = document.getElementById('extractResult');
+
+  if (!fileInput.files[0]) return showToast('이미지를 선택해주세요');
+
+  resultEl.style.display = 'block';
+  resultEl.textContent = '처리 중...';
+
+  try {
+    const buffer = await fileInput.files[0].arrayBuffer();
+    const decoder = new TextDecoder('utf-8');
+    const fullText = decoder.decode(buffer);
+
+    const idx = fullText.indexOf(extractMark);
+    if (idx === -1) {
+      resultEl.textContent = '숨겨진 메시지를 찾을 수 없습니다';
+      return;
+    }
+
+    const message = fullText.slice(idx + extractMark.length).trim();
+    resultEl.innerHTML = `<strong>발견된 메시지:</strong><br><br>${message.replace(/\n/g, '<br>')}`;
+  } catch (e) {
+    resultEl.textContent = '오류 발생: ' + e.message;
+  }
+};
+</script>
+</body>
+</html>
