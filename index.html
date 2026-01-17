@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>이미지 메시지 숨기기 도구 : JBJB Service</title>
   <link rel="icon" type="image/svg+xml" href="./logo.png">
-
   <style>
     :root {
       --bg: #121212;
@@ -18,20 +17,19 @@
       --danger: #ff4444;
       --radius: 16px;
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-
     /* 탭 네비게이션 */
     .tab-bar {
       background: #1a1a1a;
@@ -41,7 +39,6 @@
       top: 0;
       z-index: 100;
     }
-
     .tab-container {
       max-width: 520px;
       margin: 0 auto;
@@ -50,7 +47,6 @@
       gap: 8px;
       padding: 0 20px;
     }
-
     .tab-btn {
       flex: 1;
       padding: 12px;
@@ -63,24 +59,21 @@
       transition: all 0.25s;
       font-size: 0.98rem;
     }
-
     .tab-btn.active {
       background: var(--accent);
       color: white;
       box-shadow: 0 4px 16px rgba(54,99,255,0.35);
     }
-
     .tab-btn:hover:not(.active) {
       background: #2c2c2c;
       color: #ddd;
     }
-
     .page-container {
       padding: 20px;
       display: flex;
       justify-content: center;
+      flex: 1;
     }
-
     .tab-content {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -93,11 +86,9 @@
       display: none;
       position: relative;
     }
-
     .tab-content.active {
       display: block;
     }
-
     /* 정보 버튼 (a.png 이미지 사용) */
     .info-btn {
       position: absolute;
@@ -111,17 +102,14 @@
       transition: all 0.2s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
-
     .info-btn:hover {
       transform: scale(1.1);
     }
-
     .info-btn img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
     /* 모달 */
     .modal-overlay {
       position: fixed;
@@ -133,11 +121,9 @@
       align-items: center;
       z-index: 2000;
     }
-
     .modal-overlay.active {
       display: flex;
     }
-
     .modal-content {
       background: #1e1e1e;
       border: 1px solid #444;
@@ -149,12 +135,10 @@
       position: relative;
       animation: modalFadeIn 0.4s ease-out;
     }
-
     @keyframes modalFadeIn {
       from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     .modal-close {
       position: absolute;
       top: 16px;
@@ -164,23 +148,19 @@
       cursor: pointer;
       transition: color 0.2s;
     }
-
     .modal-close:hover {
       color: white;
     }
-
     .modal-content h2 {
       text-align: center;
       margin-bottom: 1.4rem;
       font-size: 1.5rem;
     }
-
     .modal-content p {
       line-height: 1.6;
       color: #ccc;
       margin-bottom: 1.2rem;
     }
-
     h1 {
       font-size: 2.1rem;
       font-weight: 700;
@@ -188,21 +168,18 @@
       margin-bottom: 0.6rem;
       letter-spacing: -0.5px;
     }
-
     .subtitle {
       color: var(--text-sub);
       text-align: center;
       font-size: 1rem;
       margin-bottom: 2.2rem;
     }
-
     .step-dots {
       display: flex;
       justify-content: center;
       gap: 12px;
       margin-bottom: 2rem;
     }
-
     .step-dot {
       width: 10px;
       height: 10px;
@@ -210,13 +187,11 @@
       background: #444;
       transition: all 0.4s ease;
     }
-
     .step-dot.active {
       background: var(--accent);
       box-shadow: 0 0 0 4px rgba(54,99,255,0.25);
       transform: scale(1.3);
     }
-
     .upload-zone {
       border: 2px dashed #444;
       border-radius: 16px;
@@ -231,18 +206,15 @@
       justify-content: center;
       align-items: center;
     }
-
     .upload-zone:hover,
     .upload-zone.active {
       border-color: var(--accent);
       background: rgba(54,99,255,0.08);
     }
-
     .upload-zone.dragover {
       border-color: var(--accent-hover);
       background: rgba(54,99,255,0.15);
     }
-
     .upload-preview {
       max-width: 100%;
       max-height: 140px;
@@ -252,23 +224,19 @@
       display: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
-
     .upload-text {
       font-size: 1.1rem;
       margin-bottom: 0.6rem;
       transition: opacity 0.3s;
     }
-
     .has-preview .upload-text {
       opacity: 0.65;
       font-size: 0.98rem;
     }
-
     .upload-subtext {
       color: var(--text-sub);
       font-size: 0.9rem;
     }
-
     .filename-display {
       margin-top: 0.8rem;
       color: var(--accent);
@@ -276,7 +244,6 @@
       font-size: 0.95rem;
       word-break: break-all;
     }
-
     textarea {
       width: 100%;
       min-height: 120px;
@@ -291,12 +258,10 @@
       margin: 1.5rem 0;
       outline: none;
     }
-
     textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(54,99,255,0.15);
     }
-
     .btn {
       width: 100%;
       padding: 16px;
@@ -310,22 +275,18 @@
       transition: all 0.25s ease;
       margin-top: 1rem;
     }
-
     .btn:hover {
       background: var(--accent-hover);
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(54,99,255,0.35);
     }
-
     .back-btn {
       background: #2c2c2c;
       color: #ccc;
     }
-
     .back-btn:hover {
       background: #383838;
     }
-
     #finalPreview {
       max-width: 100%;
       border-radius: 12px;
@@ -333,7 +294,6 @@
       border: 1px solid #444;
       display: none;
     }
-
     .toast {
       position: fixed;
       top: 20px;
@@ -351,12 +311,35 @@
       transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       z-index: 1000;
     }
-
     .toast.show {
       opacity: 1;
       transform: translateY(0);
     }
-
+    /* 새로 추가한 푸터 스타일 */
+    footer {
+      background: #0f0f0f;
+      border-top: 1px solid #222;
+      padding: 28px 20px;
+      text-align: center;
+      font-size: 0.92rem;
+      color: #777;
+      margin-top: auto;
+    }
+    .footer-text {
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .footer-link {
+      color: #5a8aff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .footer-link:hover {
+      color: #7aa0ff;
+      text-decoration: underline;
+    }
     @media (max-width: 520px) {
       .tab-container { flex-direction: column; gap: 10px; }
       .tab-btn { width: 100%; }
@@ -375,63 +358,48 @@
 </div>
 
 <div class="page-container">
-
-
   <div id="hideTab" class="tab-content active">
     <div class="info-btn" onclick="document.getElementById('infoModal').classList.add('active')">
       <img src="a.png" alt="정보">
     </div>
-
     <h1>메시지 숨기기</h1>
     <div class="subtitle">이미지에 메시지를 인코딩합니다</div>
-
     <div class="step-dots">
       <div class="step-dot active"></div>
       <div class="step-dot"></div>
     </div>
-
     <div class="upload-zone" id="hideDropZone">
       <img id="hidePreview" class="upload-preview" alt="미리보기"/>
       <div class="upload-text">PNG 이미지를 여기에 올려주세요</div>
       <div class="upload-subtext">클릭하거나 파일을 드래그해서 업로드</div>
       <div class="filename-display" id="hideFileName"></div>
     </div>
-
     <input type="file" id="hideImageInput" accept="image/png" style="display:none;">
-
     <label style="display:block; margin:1.8rem 0 0.8rem; font-weight:500; color:var(--text-sub);">
       숨길 메시지
     </label>
     <textarea id="secretText" placeholder="여기에 비밀 메시지를 입력하세요..."></textarea>
-
     <button class="btn" id="createHiddenBtn">이미지 만들기 & 다운로드</button>
   </div>
-
 
   <div id="extractTab" class="tab-content">
     <div class="info-btn" onclick="document.getElementById('infoModal').classList.add('active')">
       <img src="a.png" alt="정보">
     </div>
-
     <h1>메시지 조회</h1>
     <div class="subtitle">숨겨진 메시지를 조회합니다</div>
-
     <div class="step-dots">
       <div class="step-dot active"></div>
       <div class="step-dot"></div>
     </div>
-
     <div class="upload-zone" id="extractDropZone">
       <img id="extractPreview" class="upload-preview" alt="미리보기"/>
       <div class="upload-text">PNG 이미지를 여기에 올려주세요</div>
       <div class="upload-subtext">클릭하거나 파일을 드래그</div>
       <div class="filename-display" id="extractFileName"></div>
     </div>
-
     <input type="file" id="extractImageInput" accept="image/*" style="display:none;">
-
     <button class="btn" id="extractBtn">메시지 추출하기</button>
-
     <div id="extractResult" style="
       margin-top: 2rem;
       padding: 20px;
@@ -444,7 +412,6 @@
       display: none;
     "></div>
   </div>
-
 </div>
 
 <!-- 정보 모달 (공통) -->
@@ -464,13 +431,21 @@
 <!-- 토스트 알림 -->
 <div class="toast" id="toast"></div>
 
+<!-- 새로 추가된 푸터 -->
+<footer>
+  <div class="footer-text">
+    이 사이트는 <a href="https://sharer.jbjb.r-e.kr/user?id=jbeom&nickname=JB777" 
+                   target="_blank" 
+                   class="footer-link">JB777</a>이 만들었습니다!
+  </div>
+</footer>
+
 <script>
 // 탭 전환
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
     btn.classList.add('active');
     document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
   });
@@ -491,7 +466,6 @@ function handleFileSelect(fileInput, dropZone, previewImg, fileNameEl, acceptOnl
       showToast('PNG 파일만 업로드할 수 있습니다');
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImg.src = e.target.result;
@@ -499,23 +473,17 @@ function handleFileSelect(fileInput, dropZone, previewImg, fileNameEl, acceptOnl
       dropZone.classList.add('has-preview');
     };
     reader.readAsDataURL(file);
-
     fileNameEl.textContent = file.name;
   };
-
   fileInput.addEventListener('change', e => {
     if (e.target.files[0]) handle(e.target.files[0]);
   });
-
   dropZone.addEventListener('click', () => fileInput.click());
-
   dropZone.addEventListener('dragover', e => {
     e.preventDefault();
     dropZone.classList.add('dragover');
   });
-
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-
   dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
@@ -532,32 +500,25 @@ handleFileSelect(
   document.getElementById('hideFileName'),
   true // PNG만
 );
-
 document.getElementById('createHiddenBtn').onclick = async () => {
   const fileInput = document.getElementById('hideImageInput');
   const text = document.getElementById('secretText').value.trim();
-
   if (!fileInput.files[0]) return showToast('PNG 이미지를 선택해주세요');
   if (!text) return showToast('숨길 메시지를 입력해주세요');
-
   try {
     const buffer = await fileInput.files[0].arrayBuffer();
     const bytes = new Uint8Array(buffer);
     const encoder = new TextEncoder();
     const markBytes = encoder.encode(hideMark + text);
-
     const combined = new Uint8Array(bytes.length + markBytes.length);
     combined.set(bytes);
     combined.set(markBytes, bytes.length);
-
     const blob = new Blob([combined], { type: 'image/png' });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement('a');
     a.href = url;
     a.download = 'hidden_' + fileInput.files[0].name;
     a.click();
-
     showToast('이미지가 성공적으로 생성되어 다운로드되었습니다!');
   } catch (e) {
     showToast('오류가 발생했습니다 : ' + e.message);
@@ -572,27 +533,21 @@ handleFileSelect(
   document.getElementById('extractPreview'),
   document.getElementById('extractFileName')
 );
-
 document.getElementById('extractBtn').onclick = async () => {
   const fileInput = document.getElementById('extractImageInput');
   const resultEl = document.getElementById('extractResult');
-
   if (!fileInput.files[0]) return showToast('이미지를 선택해주세요');
-
   resultEl.style.display = 'block';
   resultEl.textContent = '처리 중...';
-
   try {
     const buffer = await fileInput.files[0].arrayBuffer();
     const decoder = new TextDecoder('utf-8');
     const fullText = decoder.decode(buffer);
-
     const idx = fullText.indexOf(extractMark);
     if (idx === -1) {
       resultEl.textContent = '숨겨진 메시지를 찾을 수 없습니다';
       return;
     }
-
     const message = fullText.slice(idx + extractMark.length).trim();
     resultEl.innerHTML = `<strong>발견된 메시지:</strong><br><br>${message.replace(/\n/g, '<br>')}`;
   } catch (e) {
